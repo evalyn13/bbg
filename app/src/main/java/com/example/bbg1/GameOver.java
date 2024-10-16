@@ -27,13 +27,16 @@ public class GameOver extends AppCompatActivity{
         }
         tvPoints.setText("" + points);
     }
-
-    public void restart (View view){
+    public void restart(View view) {
         Intent intent = new Intent(GameOver.this, MainActivity.class);
+        intent.putExtra("isLoggedIn", true); // Pass login state
         startActivity(intent);
         finish();
     }
-    public void exit (View view){
+
+    public void exit (View view) {
         finish();
     }
+
+
 }

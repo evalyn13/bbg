@@ -7,18 +7,18 @@
     android:layout_height="match_parent"
     android:background="@drawable/login_background"
     android:gravity="center">
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical">
-        
+
         <ImageView
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:src="@drawable/baseline_account_circle_24"/>
-        
+
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             android:padding="18dp"
             android:inputType="textPassword"
             android:id="@+id/password_input"/>
-        
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:layout_marginTop="32dp"
             android:textSize="20sp"
             android:id="@+id/login_btn"/>
-        
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,13 +64,14 @@
             android:textSize="18sp"
             android:textColor="@color/white"
             android:layout_marginTop="32dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
             android:gravity="center">
-            
+
             <ImageView
                 android:id="@+id/googlesigninbtn"
                 android:layout_width="64dp"
@@ -78,8 +79,19 @@
                 android:layout_margin="16dp"
                 android:src="@drawable/g"
                 android:contentDescription="Sign in with Google"/>
-            
         </LinearLayout>
+
+        <!-- Clickable Sign Up Text -->
+        <TextView
+            android:id="@+id/signup_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Don't have an account? Sign up here"
+            android:textColor="@color/white"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"/>
 
     </LinearLayout>
 

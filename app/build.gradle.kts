@@ -68,6 +68,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation ("com.google.android.gms:play-services-auth:20.5.0")
-    implementation ("com.facebook.android:facebook-login:15.0.0")
-
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0") // for JSON conversion
+    implementation ("com.google.code.gson:gson:2.8.9")
 }

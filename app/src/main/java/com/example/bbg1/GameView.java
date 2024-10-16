@@ -27,6 +27,7 @@ public class GameView extends View {
     Paint textPaint = new Paint();
     Paint healthPaint = new Paint();
     Paint brickPaint = new Paint();
+    Paint levelPaint = new Paint(); // Added for level display
     float TEXT_SIZE = 120;
     float paddleX, paddleY;
     float oldX, oldPaddleX;
@@ -41,7 +42,7 @@ public class GameView extends View {
     int numBricks = 0;
     int brokenBricks = 0;
     boolean gameOver = false;
-
+    int level = 1; // Added level variable
 
     public GameView(MainActivity context) {
         super(context);
@@ -63,6 +64,8 @@ public class GameView extends View {
         textPaint.setTextAlign(Paint.Align.LEFT);
         healthPaint.setColor(Color.GREEN);
         brickPaint.setColor(Color.argb(255, 249, 129, 0));
+        levelPaint.setColor(Color.WHITE); // Set color for level display
+        levelPaint.setTextSize(80); // Set text size for level display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -81,9 +84,10 @@ public class GameView extends View {
     private void createBricks() {
         int brickWidth = dWidth / 8;
         int brickHeight = dHeight / 16;
+        numBricks = 0; // Reset the number of bricks
         for (int column = 0; column < 8; column++) {
             for (int row = 0; row < 3; row++) {
-                bricks[numBricks]=new Brick(row, column, brickWidth, brickHeight);
+                bricks[numBricks] = new Brick(row, column, brickWidth, brickHeight);
                 numBricks++;
             }
         }
@@ -92,16 +96,25 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // Check for game over state and handle it immediately
+        if (gameOver) {
+            launchGameOver(); // Launch the game over activity if not done yet
+            return; // Prevent further updates and rendering
+        }
+
+        // Your existing game logic below this line
         canvas.drawColor(Color.BLACK);
         ballX += velocity.getX();
         ballY += velocity.getY();
+
         if ((ballX >= dWidth - ball.getWidth()) || ballX <= 0) {
             velocity.setX(velocity.getX() * -1);
         }
-        if(ballY <=0) {
-        velocity.setY(velocity.getY() * -1);
+        if (ballY <= 0) {
+            velocity.setY(Math.abs(velocity.getY())); // Ensure the ball moves downwards
         }
-        if(ballY > paddleY + paddle.getHeight()) {
+        if (ballY > paddleY + paddle.getHeight()) {
             ballX = 1 + random.nextInt(dWidth - ball.getWidth() - 1);
             ballY = dHeight / 3;
             if (mpMiss != null) {
@@ -111,8 +124,8 @@ public class GameView extends View {
             velocity.setY(32);
             life--;
             if (life == 0) {
-                gameOver = true;
-                launchGameOver();
+                gameOver = true; // Set game over flag
+                // No need to call launchGameOver here, it will be handled in the check above
             }
         }
 
@@ -126,20 +139,27 @@ public class GameView extends View {
             velocity.setX(velocity.getX() + 1);
             velocity.setY((velocity.getY() + 1) * -1);
         }
+
         canvas.drawBitmap(ball, ballX, ballY, null);
         canvas.drawBitmap(paddle, paddleX, paddleY, null);
+
         for (int i = 0; i < numBricks; i++) {
             if (bricks[i].getVisibility()) {
-                canvas.drawRect(bricks[i].column * bricks[i].width + 1, bricks[i].row * bricks[i].height + 1, bricks[i].column * bricks[i].width + bricks[i].width - 1, bricks[i].row * bricks[i].height + bricks[i].height - 1, brickPaint);
+                canvas.drawRect(bricks[i].column * bricks[i].width + 1, bricks[i].row * bricks[i].height + 1,
+                        bricks[i].column * bricks[i].width + bricks[i].width - 1,
+                        bricks[i].row * bricks[i].height + bricks[i].height - 1, brickPaint);
             }
         }
-        canvas.drawText("" + points, 20, TEXT_SIZE, textPaint);
+
+        canvas.drawText("Points: " + points, 20, TEXT_SIZE, textPaint);
         if (life == 2) {
             healthPaint.setColor(Color.YELLOW);
         } else if (life == 1) {
             healthPaint.setColor(Color.RED);
         }
         canvas.drawRect(dWidth - 200, 30, dWidth - 200 + 60 * life, 80, healthPaint);
+        canvas.drawText("Level: " + level, 20, dHeight - 100, levelPaint); // Draw current level
+
         for (int i = 0; i < numBricks; i++) {
             if (bricks[i].getVisibility()) {
                 if (ballX + ballWidth >= bricks[i].column * bricks[i].width
@@ -153,28 +173,32 @@ public class GameView extends View {
                     bricks[i].setInvisible();
                     points += 10;
                     brokenBricks++;
-                    if (brokenBricks == 24) {
-                        launchGameOver();
+
+                    // Check for level up
+                    if (brokenBricks == numBricks) {
+                        levelUp(); // Call level up method
                     }
                 }
             }
         }
-        if (brokenBricks == numBricks) {
-            gameOver = true;
-        }
-        if (!gameOver) {
-            handler.postDelayed(runnable, UPDATE_MILLIS);
-        }
+
+        handler.postDelayed(runnable, UPDATE_MILLIS);
     }
 
-
+    private void levelUp() {
+        level++;
+        brokenBricks = 0; // Reset broken bricks
+        velocity.setX((int)(velocity.getX() * 1.1)); // Increase ball speed
+        velocity.setY((int)(velocity.getY() * 1.1)); // Increase vertical speed
+        createBricks(); // Create new set of bricks
+    }
 
     private void launchGameOver() {
         handler.removeCallbacksAndMessages(null);
         Intent intent = new Intent(context, GameOver.class);
         intent.putExtra("points", points);
         context.startActivity(intent);
-        ((Activity)context).finish();
+        ((Activity) context).finish();
     }
 
     private int xVelocity1() {
@@ -193,11 +217,13 @@ public class GameView extends View {
                 oldX = event.getX();
                 oldPaddleX = paddleX;
             }
-            if (action == MotionEvent.ACTION_MOVE){
+            if (action == MotionEvent.ACTION_MOVE) {
                 float shift = oldX - touchX;
                 float newPaddleX = oldPaddleX - shift;
                 if (newPaddleX >= dWidth - paddle.getWidth())
                     paddleX = dWidth - paddle.getWidth();
+                else if (newPaddleX < 0)
+                    paddleX = 0; // Prevent paddle from going off-screen
                 else
                     paddleX = newPaddleX;
             }
